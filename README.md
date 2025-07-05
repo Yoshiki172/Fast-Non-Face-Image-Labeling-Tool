@@ -16,7 +16,7 @@ A lightweight, fast annotation GUI for images where standard face detectors fail
 - **Safe Update**: Editing boxes auto-updates the annotation file; deleting all boxes removes the line.
 
   <img src="https://github.com/user-attachments/assets/c91937a3-22d6-4da0-a116-5c339653772a" width="600" />
-
+  <img src="https://github.com/user-attachments/assets/521dae3a-cffb-42fc-9ad4-63f19b45c666" width="600" />
 ## Installation
 
 1. Clone the repository:
