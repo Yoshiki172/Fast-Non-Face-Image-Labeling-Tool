@@ -25,7 +25,6 @@ class ImageLabelingTool:
         self.scale_factor = 1.0
         self.snap_to_grid = True
 
-        # グリッド分割数の初期値
         self.grid_div_x = 64
         self.grid_div_y = 32
 
@@ -41,7 +40,6 @@ class ImageLabelingTool:
         self.grid_toggle_button = ttk.Button(self.control_frame, text="Disable Grid", command=self.toggle_grid_snap, bootstyle=INFO)
         self.grid_toggle_button.pack(side=tk.LEFT, padx=5)
 
-        # グリッド分割数設定用エントリーとラベル
         self.grid_label = ttk.Label(self.control_frame, text=f"Grid: {self.grid_div_x} x {self.grid_div_y}")
         self.grid_label.pack(side=tk.LEFT, padx=5)
 
