@@ -218,7 +218,6 @@ class ImageLabelingTool:
             self.end_x = self.start_x + side if self.end_x >= self.start_x else self.start_x - side
             self.end_y = self.start_y + side if self.end_y >= self.start_y else self.start_y - side
 
-        # === 追加: 矩形サイズが0のものは無視 ===
         if self.start_x == self.end_x or self.start_y == self.end_y:
             self.canvas.delete("preview")
             return
@@ -230,16 +229,6 @@ class ImageLabelingTool:
         self.rect_ids.append(rect_id)
 
         scale_inv = 1 / self.scale_factor
-        x1, y1, x2, y2 = [int(coord * scale_inv) for coord in box[:4]]
-
-        # 元画像のサイズを取得
-        img_w, img_h = self.image.size
-
-        # 最大値に制限（端がちょうど入るように）
-        x1 = max(0, min(x1, img_w))
-        x2 = max(0, min(x2, img_w))
-        y1 = max(0, min(y1, img_h))
-        y2 = max(0, min(y2, img_h))
         x1, y1, x2, y2 = [int(coord * scale_inv) for coord in box[:4]]
         self.all_rectangles.setdefault(self.current_index, []).append((x1, y1, x2, y2, label))
         self.canvas.delete("preview")
@@ -264,9 +253,8 @@ class ImageLabelingTool:
 
     def update_annotation_file(self):
         if not self.image_paths or not (0 <= self.current_index < len(self.image_paths)):
-            return  # ← ここで不正な状態なら抜ける
+            return  
         if not os.path.exists(self.output_txt_path):
-            # ファイルがなければ空ファイルを作成
             with open(self.output_txt_path, "w") as f:
                 pass
 
