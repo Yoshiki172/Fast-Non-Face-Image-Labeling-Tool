@@ -38,7 +38,7 @@ python label_tool.py
 2. **Grid Settings**: Adjust `Cols×Rows` in the grid entry boxes and press Enter to redraw.
 3. **Toggle Grid**: Enable or disable grid snapping with `Disable Grid` / `Enable Grid`.
 4. **Draw Boxes**:
-   - Drag left mouse to draw; Press `Square mode` for 1:1 aspect ratio.
+   - Drag left mouse to draw; Press `Square mode` to change to 1:1 aspect ratio.
    - Right-click inside a box to remove it.
 5. **Zoom**: Move the slider at bottom to zoom in/out.(There is a bug, being fixed now)
 6. **Label**: Enter numeric label in the box next to `Color` before drawing.
