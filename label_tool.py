@@ -1,6 +1,6 @@
 import tkinter as tk
 from tkinter import filedialog, messagebox, colorchooser
-from PIL import Image, ImageTk, ImageDraw
+from PIL import Image, ImageTk
 import os
 import ttkbootstrap as ttk
 from ttkbootstrap.constants import *
@@ -10,10 +10,8 @@ class ImageLabelingTool:
         self.root = root
         self.root.title("Image Labeling Tool")
         self.style = ttk.Style("cyborg")
-        #self.root.iconbitmap('./icon.ico')
 
         self.image_paths = []
-        self.images = []
         self.current_index = 0
         self.all_rectangles = {}
         self.rect_ids = []
@@ -69,6 +67,9 @@ class ImageLabelingTool:
         self.label_entry.insert(0, "0")
         self.label_entry.pack(side=tk.LEFT, padx=5)
 
+        self.reset_zoom_button = ttk.Button(self.control_frame, text="Reset Zoom", command=self.reset_zoom, bootstyle=INFO)
+        self.reset_zoom_button.pack(side=tk.LEFT, padx=5)
+
         self.canvas = tk.Canvas(root, cursor="cross", bg="gray")
         self.canvas.pack(side=tk.TOP, fill=tk.BOTH, expand=True)
 
@@ -80,6 +81,9 @@ class ImageLabelingTool:
         self.canvas.bind("<B1-Motion>", self.on_mouse_drag)
         self.canvas.bind("<ButtonRelease-1>", self.on_mouse_up)
         self.canvas.bind("<Button-3>", self.on_right_click)
+
+    def reset_zoom(self):
+        self.slider.set(1.0)
 
     def update_grid_divisions(self, event=None):
         try:
@@ -111,7 +115,6 @@ class ImageLabelingTool:
             y = int(j * step_y)
             self.grid_lines.append(self.canvas.create_line(0, y, width, y, fill='white', dash=(2, 2)))
 
-
     def snap_to_grid_coord(self, x, y):
         if not hasattr(self, 'resized_image'):
             return x, y
@@ -120,7 +123,10 @@ class ImageLabelingTool:
         step_y = height / self.grid_div_y
         snapped_x = round(x / step_x) * step_x
         snapped_y = round(y / step_y) * step_y
-        return int(snapped_x), int(snapped_y)
+        snapped_x = min(int(snapped_x), width - 1)
+        snapped_y = min(int(snapped_y), height - 1)
+        return snapped_x, snapped_y
+
 
     def toggle_grid_snap(self):
         self.snap_to_grid = not self.snap_to_grid
@@ -184,7 +190,7 @@ class ImageLabelingTool:
         if hasattr(self, 'image'):
             self.update_resized_image()
             self.show_existing_rectangles()
-        self.slider.lift()
+        
 
     def toggle_square_mode(self):
         self.square_mode = not self.square_mode
@@ -206,10 +212,16 @@ class ImageLabelingTool:
 
     def on_mouse_up(self, event):
         self.end_x, self.end_y = self.snap_to_grid_coord(event.x, event.y) if self.snap_to_grid else (event.x, event.y)
+
         if self.square_mode:
             side = min(abs(self.end_x - self.start_x), abs(self.end_y - self.start_y))
             self.end_x = self.start_x + side if self.end_x >= self.start_x else self.start_x - side
             self.end_y = self.start_y + side if self.end_y >= self.start_y else self.start_y - side
+
+        # === 追加: 矩形サイズが0のものは無視 ===
+        if self.start_x == self.end_x or self.start_y == self.end_y:
+            self.canvas.delete("preview")
+            return
 
         label = self.label_entry.get()
         box = (min(self.start_x, self.end_x), min(self.start_y, self.end_y),
@@ -218,6 +230,16 @@ class ImageLabelingTool:
         self.rect_ids.append(rect_id)
 
         scale_inv = 1 / self.scale_factor
+        x1, y1, x2, y2 = [int(coord * scale_inv) for coord in box[:4]]
+
+        # 元画像のサイズを取得
+        img_w, img_h = self.image.size
+
+        # 最大値に制限（端がちょうど入るように）
+        x1 = max(0, min(x1, img_w))
+        x2 = max(0, min(x2, img_w))
+        y1 = max(0, min(y1, img_h))
+        y2 = max(0, min(y2, img_h))
         x1, y1, x2, y2 = [int(coord * scale_inv) for coord in box[:4]]
         self.all_rectangles.setdefault(self.current_index, []).append((x1, y1, x2, y2, label))
         self.canvas.delete("preview")
@@ -241,6 +263,8 @@ class ImageLabelingTool:
                 break
 
     def update_annotation_file(self):
+        if not self.image_paths or not (0 <= self.current_index < len(self.image_paths)):
+            return  # ← ここで不正な状態なら抜ける
         if not os.path.exists(self.output_txt_path):
             # ファイルがなければ空ファイルを作成
             with open(self.output_txt_path, "w") as f:
