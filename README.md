@@ -14,7 +14,8 @@ A lightweight, fast annotation GUI for images where standard face detectors fail
   path/to/image.png x1,y1,x2,y2,label x1,y1,x2,y2,label...
   ```
 - **Safe Update**: Editing boxes auto-updates the annotation file; deleting all boxes removes the line.
-- **No Dependencies on Face Models**: Works on any image, whether or not a face is present.
+
+  <img src="https://github.com/user-attachments/assets/c91937a3-22d6-4da0-a116-5c339653772a" width="600" />
 
 ## Installation
 
@@ -44,3 +45,9 @@ python label_tool.py
 7. **Next / Prev**: Save and proceed to next image, or just skip with `Next (No Save)`.
 
 Annotations are stored in `annotations.txt` alongside image paths.
+
+## License
+
+MIT © Yoshiki Inazu
+
+
